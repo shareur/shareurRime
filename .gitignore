@@ -1,0 +1,65 @@
+# ============================================================================
+# 会被 Rime 自动重建的产物、以及个人使用记录，都不纳入版本控制。
+# 「启用副本」——从 others/optional/ 复制到根目录的那一份——同样不入库。
+# ============================================================================
+
+# 编译产物（可重新部署自动重建）
+build/*
+# 例外：小鹤音形主码表官方只分发预编译件（无源码），必须保留
+!build/flypy.table.bin
+!build/flypy.prism.bin
+!build/flypy.reverse.bin
+
+# 个人输入习惯数据库（词频、用户词典 db）
+*.userdb/
+*.userdb.txt
+*.db.txt
+
+# Rime 同步备份
+sync/
+
+# 本机安装信息与使用记录（含设备 ID）
+installation.yaml
+user.yaml
+
+# 旧备份包
+rime_yang.zip
+
+# macOS
+.DS_Store
+.AppleDouble
+
+# 临时文件
+__pycache__/
+*.pyc
+
+# ---------------------------------------------------------------------------
+# 「启用副本」：others/optional/ 里的原件已跟踪，
+# 复制回根目录 / en_dicts 的那一份不必再跟踪（让启用动作不弄脏 git status）。
+# 这些规则用前导 / 锚定仓库根目录，否则会把 others/optional/ 里的原件也忽略掉。
+# ---------------------------------------------------------------------------
+/double_pinyin.schema.yaml
+/double_pinyin_abc.schema.yaml
+/double_pinyin_jiajia.schema.yaml
+/double_pinyin_mspy.schema.yaml
+/double_pinyin_ziguang.schema.yaml
+/t9.schema.yaml
+/wubi86.schema.yaml
+en_dicts/cn_en_abc.txt
+en_dicts/cn_en_double_pinyin.txt
+en_dicts/cn_en_jiajia.txt
+en_dicts/cn_en_mspy.txt
+en_dicts/cn_en_ziguang.txt
+
+# 同理：上述双拼方案专用的中英混输词库，启用时从 others/optional/en_dicts/ 复制到 en_dicts/
+# （rime_ice 与 double_pinyin_flypy 用到的 cn_en.txt / cn_en_flypy.txt 不在此列，仍跟踪）
+en_dicts/cn_en_abc.txt
+en_dicts/cn_en_double_pinyin.txt
+en_dicts/cn_en_jiajia.txt
+en_dicts/cn_en_mspy.txt
+en_dicts/cn_en_ziguang.txt
+
+# 跨平台文件一律保留跟踪，不要加入忽略：
+#   macOS   squirrel.yaml / squirrel.custom.yaml / macOS-双击复制文件内容.command
+#   Windows weasel.yaml / weasel.custom.yaml
+#   Linux   仅需 default.yaml + 各方案 .schema.yaml

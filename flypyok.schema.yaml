@@ -1,0 +1,37 @@
+# Rime schema settings
+# encoding: utf-8
+# 小鹤音形 ok 拼字（独立方案）
+# 主要作为 flypy.schema.yaml 的 dependencies 依赖，用于编译 flypyok 码表；
+# 也可作为独立方案手动切换到本方案直接输入 ok 拼字码（不带 ok 前缀）。
+# 主方案内输入 ok + 码（如 okhguu=丁）由 flypy 方案内置处理。
+
+schema:
+  schema_id: flypyok
+  name: 小鹤音形 ok 拼字
+  version: "10.26.1"
+
+engine:
+  processors:
+    - ascii_composer
+    - speller
+    - selector
+    - navigator
+    - express_editor
+  segmentors:
+    - ascii_segmentor
+    - abc_segmentor
+    - fallback_segmentor
+  translators:
+    - table_translator
+
+speller:
+  alphabet: "abcdefghijklmnopqrstuvwxyz'"
+  initials: "abcdefghijklmnopqrstuvwxyz"
+  max_code_length: 6
+
+translator:
+  dictionary: flypyok
+  enable_charset_filter: false
+  enable_completion: false
+  enable_sentence: false
+  enable_user_dict: false

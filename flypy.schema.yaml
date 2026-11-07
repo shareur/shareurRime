@@ -1,0 +1,193 @@
+# Rime schema settings
+# encoding: utf-8
+#
+# 小鹤音形 10.26.11
+# 基线＝官方「Rime 平台 · 鼠须管 for macOS」挂接包（2026-11-02 版）的 flypy.schema.yaml。
+# 本仓库在其上仅保留 3 处本地改动，其余与官方一致：
+#   1) OK 拼字（ok_mode）：官方包未提供该 translator，本仓库用 flypyok 码表补全
+#   2) 关闭 4 码全码自动上屏（auto_select_pattern 仅保留分号快符），避免连打多出一个空格
+#   3) 简繁转换使用 s2tw（台湾正体），官方为 s2hk（香港）
+# 详细说明见 docs/03-小鹤音形配置说明.md
+
+schema:
+  schema_id: flypy
+  name: 小鹤音形
+  version: "10.26.11"
+  author:
+    - 方案设计：何海峰 flypy.cc
+  description:
+    - 小鹤音形
+  dependencies:
+    - flypydz
+    - flypyok
+
+punctuator:
+  import_preset: default
+
+switches:
+  - name: ascii_mode
+    reset: 0
+    states: [ 中文, 英文 ]
+  - name: full_shape
+    states: [ 半角, 全角 ]
+  - name: simplification
+    states: [ 简, 繁 ]
+    reset: 0
+  - name: ascii_punct
+   # states: [ 。，, ．， ]
+    reset: 0
+
+engine:
+  processors:
+    - ascii_composer
+    - recognizer
+    - key_binder
+    - speller
+    - punctuator
+    - selector
+    - navigator
+    - express_editor #空格确认
+  segmentors:
+    - ascii_segmentor
+    - matcher
+    - affix_segmentor@ok_mode
+    - abc_segmentor
+    - punct_segmentor
+    - fallback_segmentor
+  translators:
+    - punct_translator
+    - table_translator
+    - lua_translator@date_translator
+    - lua_translator@time_translator
+    - table_translator@custom_phraseVD
+    - table_translator@custom_phraseXT
+    - table_translator@custom_phraseYH
+    - table_translator@custom_phraseQMZ
+    - reverse_lookup_translator
+    - history_translator@history
+    - lua_translator@calculator_translator
+    - table_translator@ok_mode
+  filters:
+    - simplifier
+    - simplifier@simplification
+    - uniquifier
+
+speller:
+  alphabet: "';zyxwvutsrqponmlkjihgfedcba"
+  initials: 'abcdefghijklmnopqrstuvwxyz;'
+  finals: "'"
+  #delimiter: " '"
+  max_code_length: 4 #全码码长，过则顶字上屏
+  auto_select: true   #自动上屏
+  # 本地改动：官方为 ^;.$|^\w{4}$（4 码也自动上屏），此处仅保留分号快符自动上屏
+  auto_select_pattern: ^;.$
+  auto_clear: max_length #manual|auto|max_length 空码按下一键确认清屏|空码自动清|达到最长码时后码顶上清屏
+
+translator:
+  dictionary: flypy
+  enable_charset_filter: false
+  enable_sentence: false
+  enable_completion: false
+  enable_user_dict: false
+  disable_user_dict_for_patterns:
+    - "^z.*$"
+
+# OK 拼字（本地补全）：输入 ok + 二分双拼码，如 okhguu=丁、okhgve=七
+# 前缀 ok 由 affix_segmentor 剥离后，用 flypyok 码表查字
+ok_mode:
+  tag: ok_mode
+  dictionary: flypyok
+  prefix: "ok"
+  tips: 〔拼字〕
+  enable_charset_filter: false
+  enable_completion: false
+  enable_sentence: false
+  enable_user_dict: false
+
+history:
+   input: ;f
+   size: 1 #重复前几次上屏
+   initial_quality: 1 #首选
+
+simplification:
+  opencc_config: s2tw.json # 本地改动：官方为 s2hk.json（香港繁体）
+  option_name: simplification
+  tips: all  #简繁对照，all字詞  char字
+
+custom_phraseVD:
+  dictionary: ""
+  user_dict: flypy_top
+  db_class: stabledb
+  enable_sentence: false
+  enable_completion: false
+  initial_quality: 0 #和系统词重码时居前
+
+custom_phraseXT:
+  dictionary: ""
+  user_dict: flypy_sys
+  db_class: stabledb
+  enable_sentence: false
+  enable_completion: false
+  initial_quality: -1 #和系统词重码时居后
+
+custom_phraseYH:
+  dictionary: ""
+  user_dict: flypy_user
+  db_class: stabledb
+  enable_sentence: false
+  enable_completion: false
+  initial_quality: -1 #和系统词重码时居后
+
+custom_phraseQMZ:
+  dictionary: ""
+  user_dict: flypy_full
+  db_class: stabledb
+  enable_sentence: false
+  enable_completion: false
+  initial_quality: -1 #和系统词重码时居后
+
+reverse_lookup:
+  dictionary: flypydz
+  target: reverse_lookup
+  comment_format:
+    - xform/ / /
+
+key_binder:
+  import_preset: default #方案切换相关
+  bindings:
+    - {accept: bracketleft, send: Page_Up, when: paging} # [上翻页
+    - {accept: bracketright, send: Page_Down, when: has_menu} # ]下翻页
+    - {accept: semicolon, send: 2, when: has_menu} #分号次选
+    - {accept: comma, send: comma, when: paging} #注销逗号翻页
+    - {accept: period, send: period, when: has_menu} #注销句号翻页
+    - {accept: dollar, send: 2, when: composing}
+    - {accept: Release+dollar, send: period, when: composing}
+    - {accept: Release+period, send: period, when: has_menu} #句号顶屏
+    - {accept: bar, send: 2, when: composing}
+    - {accept: Release+bar, send: comma, when: composing}
+    - {accept: Release+comma, send: comma, when: has_menu} #逗号顶屏
+    - {accept: "Tab", send: Escape, when: composing}
+    - {accept: "Caps_Lock", send: Escape, when: composing}
+    - {accept: "Shift_R", send: Escape, when: composing}
+    - {accept: "Shift+space", toggle: full_shape, when: always} #切换全半角
+    - {accept: "Control+j", toggle: simplification, when: always} #切换简繁
+    - {accept: "Control+period", toggle: ascii_punct, when: always} #切换中英标点
+    - {accept: "Control+m", select: .next, when: always} #切换方案
+
+recognizer:
+  import_preset: default
+  patterns:
+    #uppercase: "[A-Z][-_+.'0-9A-Za-z]*$"
+    uppercase: "" #中文状态大写锁定直接上屏
+    reverse_lookup: "[a-z`]*`+[a-z`]*"
+    ok_mode: "^ok[a-z']*$" # 本地改动：ok 交给 ok_mode（官方为 expression 里的 ok 分支）
+    punct: ""
+    expression: "^=.*$"
+
+menu:
+  page_size: 5 #候选项数
+
+style:
+  text_orientation: horizontal #竖排改为 vertical
+  candidate_list_layout: linear
+  horizontal: true
